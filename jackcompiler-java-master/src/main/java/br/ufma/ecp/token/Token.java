@@ -3,7 +3,7 @@ public class Token {
 
     public final TokenType type;
     public final String lexeme;
-    final int line;
+    public int line = 1;
   
     public Token (TokenType type, String lexeme, int line) {
         this.type = type;
