@@ -114,7 +114,8 @@ public class Parser {
       }
 
       static public boolean isOperator(String op) {
-        return "+-*/<>=~&|".contains(op);
+        return "{}()[].,;+-*/&|<>=~".contains(op);
+        //+-*/<>=~&|
         }
 
         void parseExpression() {
@@ -126,6 +127,40 @@ public class Parser {
             }
             printNonTerminal("/expression");
       }
+
+      void parseStatements() {
+        printNonTerminal("statments");
+        while (peekToken.type == TokenType.WHILE || 
+        peekToken.type == TokenType.IF || 
+        peekToken.type == TokenType.LET || 
+        peekToken.type == TokenType.DO || 
+        peekToken.type == TokenType.RETURN) {
+        parseStatement();
+        }
+        printNonTerminal("/statements");
+      }
+
+      void parseStatement() {
+        switch (peekToken.type) {
+            case LET:
+                parseLet();
+                break;
+            /*case WHILE:
+                parseWhile();
+                break;
+            case IF:
+                parseIf();
+                break;
+            case RETURN:
+                parseReturn();
+                break;*/
+            case DO:
+                parseDo();
+                break;
+            default:
+                throw error(peekToken, "Expected a statement");
+        }
+    }
 
       void parseLet() {
         printNonTerminal("letStatement");
@@ -143,4 +178,74 @@ public class Parser {
         expectPeek(TokenType.SEMICOLON);
         printNonTerminal("/letStatement");
     }
+
+    void parseIf(){
+        printNonTerminal("ifStatement");
+        expectPeek(TokenType.IF);
+
+        expectPeek(TokenType.LPAREN);
+        parseExpression();
+        expectPeek(TokenType.RPAREN);
+
+        expectPeek(TokenType.LBRACE);
+        parseStatements();
+        expectPeek(TokenType.RBRACE);
+
+        if (peekTokenIs(TokenType.ELSE)){
+            expectPeek(TokenType.ELSE);
+            expectPeek(TokenType.LBRACE);
+            parseStatements();
+            expectPeek(TokenType.RBRACE);
+        }
+        expectPeek(TokenType.SEMICOLON);
+        printNonTerminal("/ifStatement");
+    }
+
+    void parseSubroutineCall() {
+
+        var nArgs = 0;
+
+        var ident = currentToken.value();
+        var symbol = symbolTable.resolve(ident); 
+        var functionName = ident + ".";
+
+        if (peekTokenIs(TokenType.LPAREN)) {
+            expectPeek(TokenType.LPAREN);
+            vmWriter.writePush(Segment.POINTER, 0);
+            nArgs = parseExpressionList() + 1;
+            expectPeek(TokenType.RPAREN);
+            functionName = className + "." + ident;
+        } else {
+            expectPeek(TokenType.DOT);
+            expectPeek(TokenType.IDENT); 
+            if (symbol != null) { 
+                functionName = symbol.type() + "." + currentToken.value();
+                nArgs = 1; 
+            } else {
+                functionName += currentToken.value();
+            }
+
+            expectPeek(TokenType.LPAREN);
+            nArgs += parseExpressionList();
+
+            expectPeek(RPAREN);
+        }
+
+        vmWriter.writeCall(functionName, nArgs);
+    }
+
+    void parseDo(){
+        printNonTerminal("doStatement");
+        expectPeek(TokenType.DO);
+        expectPeek(TokenType.IDENT);
+        parseSubroutineCall();
+        expectPeek(TokenType.SEMICOLON);
+
+        printNonTerminal("/doStatement");
+    }
+
+    void parseReturn(){
+
+    }
+
 }

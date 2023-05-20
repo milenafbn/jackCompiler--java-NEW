@@ -5,11 +5,11 @@ import java.util.Map;
 
 public enum TokenType {
     // symbols
-    LPAREN,RPAREN,
-    LBRACE, RBRACE,
-    LBRACKET,RBRACKET,
+    LPAREN,RPAREN, //()
+    LBRACE, RBRACE, //{}
+    LBRACKET,RBRACKET, // []
      
-    COMMA, SEMICOLON, DOT,
+    COMMA, SEMICOLON, DOT, //, ; .
        
     PLUS,  MINUS,ASTERISK, SLASH,
      
@@ -26,7 +26,7 @@ public enum TokenType {
 
  
      // keywords
-     WHILE, CLASS,CONSTRUCTOR,FUNCTION,
+     WHILE, CLASS,CONSTRUCTOR,FUNCTION, NEW,
      METHOD,FIELD,STATIC,VAR,INT,
      CHAR,BOOLEAN,VOID,TRUE,FALSE,
      NULL,THIS,LET,DO,IF,ELSE, RETURN,
@@ -45,7 +45,7 @@ public enum TokenType {
     static public boolean isKeyword (TokenType type) {
         List<TokenType> keywords  = 
             List.of(
-                WHILE, CLASS,CONSTRUCTOR,FUNCTION,
+                WHILE, CLASS,CONSTRUCTOR,FUNCTION, NEW,
                 METHOD,FIELD,STATIC,VAR,INT,
                 CHAR,BOOLEAN,VOID,TRUE,FALSE,
                 NULL,THIS,LET,DO,IF,ELSE, RETURN
