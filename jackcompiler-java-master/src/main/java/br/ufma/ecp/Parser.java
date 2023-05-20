@@ -10,6 +10,9 @@ public class Parser {
     private Token currentToken;
     private Token peekToken;
     private StringBuilder xmlOutput = new StringBuilder();
+
+    private String className;
+
     
     public Parser (byte[] input) {
         scan = new Scanner(input);
@@ -203,35 +206,19 @@ public class Parser {
 
     void parseSubroutineCall() {
 
-        var nArgs = 0;
-
-        var ident = currentToken.value();
-        var symbol = symbolTable.resolve(ident); 
-        var functionName = ident + ".";
-
         if (peekTokenIs(TokenType.LPAREN)) {
             expectPeek(TokenType.LPAREN);
-            vmWriter.writePush(Segment.POINTER, 0);
-            nArgs = parseExpressionList() + 1;
             expectPeek(TokenType.RPAREN);
-            functionName = className + "." + ident;
-        } else {
+
+        } else if(peekTokenIs(TokenType.DOT)){
             expectPeek(TokenType.DOT);
             expectPeek(TokenType.IDENT); 
-            if (symbol != null) { 
-                functionName = symbol.type() + "." + currentToken.value();
-                nArgs = 1; 
-            } else {
-                functionName += currentToken.value();
-            }
-
             expectPeek(TokenType.LPAREN);
-            nArgs += parseExpressionList();
-
-            expectPeek(RPAREN);
+            parseExpressionList();
+            expectPeek(TokenType.RPAREN);
+        } else {
+            throw new Error("Invalid subroutine call");
         }
-
-        vmWriter.writeCall(functionName, nArgs);
     }
 
     void parseDo(){
