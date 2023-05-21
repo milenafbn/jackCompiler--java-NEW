@@ -41,5 +41,9 @@ public String toString() {
   
 
     }
+
+    public String value () {
+        return lexeme;
+    }
     
 }

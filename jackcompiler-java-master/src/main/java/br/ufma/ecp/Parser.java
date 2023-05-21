@@ -117,8 +117,28 @@ public class Parser {
       }
 
       static public boolean isOperator(String op) {
-        return "{}()[].,;+-*/&|<>=~".contains(op);
-        //+-*/<>=~&|
+        return "+-*/<>=~&|".contains(op);
+        }
+
+        int parseExpressionList() {
+            printNonTerminal("expressionList");
+    
+            var nArgs = 0;
+    
+            if (!peekTokenIs(TokenType.RPAREN)) 
+            {
+                parseExpression();
+                nArgs = 1;
+            }
+    
+            while (peekTokenIs(TokenType.COMMA)) {
+                expectPeek(TokenType.COMMA);
+                parseExpression();
+                nArgs++;
+            }
+    
+            printNonTerminal("/expressionList");
+            return nArgs;
         }
 
         void parseExpression() {
@@ -148,7 +168,7 @@ public class Parser {
             case LET:
                 parseLet();
                 break;
-            /*case WHILE:
+            case WHILE:
                 parseWhile();
                 break;
             case IF:
@@ -156,7 +176,7 @@ public class Parser {
                 break;
             case RETURN:
                 parseReturn();
-                break;*/
+                break;
             case DO:
                 parseDo();
                 break;
@@ -173,7 +193,7 @@ public class Parser {
         if (peekTokenIs(TokenType.LBRACKET)) {
             expectPeek(TokenType.LBRACKET);
             parseExpression();
-            expectPeek(TokenType.LBRACKET);
+            expectPeek(TokenType.RBRACKET);
         }
 
         expectPeek(TokenType.EQ);
@@ -205,20 +225,32 @@ public class Parser {
     }
 
     void parseSubroutineCall() {
+        int nArgs = 0;
+        String functionName = (TokenType.IDENT + ",");
+
+        /*if (TokenType.isKeyword(null)){
+            functionName = TokenType.isSymbol(null) + "." + currentToken.value();
+            nArgs = 1; // do proprio objeto
+        }*/
 
         if (peekTokenIs(TokenType.LPAREN)) {
             expectPeek(TokenType.LPAREN);
+            nArgs = parseExpressionList() + 1;
             expectPeek(TokenType.RPAREN);
+            functionName = className + "." + TokenType.IDENT;
 
         } else if(peekTokenIs(TokenType.DOT)){
             expectPeek(TokenType.DOT);
             expectPeek(TokenType.IDENT); 
+            functionName += currentToken.value();
+
             expectPeek(TokenType.LPAREN);
             parseExpressionList();
             expectPeek(TokenType.RPAREN);
-        } else {
-            throw new Error("Invalid subroutine call");
         }
+        /*} else {
+            throw new Error("Invalid subroutine call");
+        } term expected*/
     }
 
     void parseDo(){
