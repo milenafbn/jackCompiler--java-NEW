@@ -152,7 +152,7 @@ public class Parser {
       }
 
       void parseStatements() {
-        printNonTerminal("statments");
+        printNonTerminal("statements");
         while (peekToken.type == TokenType.WHILE || 
         peekToken.type == TokenType.IF || 
         peekToken.type == TokenType.LET || 
@@ -189,14 +189,20 @@ public class Parser {
         printNonTerminal("letStatement");
         expectPeek(TokenType.LET);
         expectPeek(TokenType.IDENT);
+        expectPeek(TokenType.EQ);
 
-        if (peekTokenIs(TokenType.LBRACKET)) {
+        /*if (peekTokenIs(!TokenType.LBRACKET)) {
             expectPeek(TokenType.LBRACKET);
             parseExpression();
             expectPeek(TokenType.RBRACKET);
         }
 
-        expectPeek(TokenType.EQ);
+        if (peekTokenIs(TokenType.IDENT)){
+            parseExpression();
+        }else{
+            parseExpression();
+        }*/
+
         parseExpression();
         expectPeek(TokenType.SEMICOLON);
         printNonTerminal("/letStatement");
@@ -263,8 +269,26 @@ public class Parser {
         printNonTerminal("/doStatement");
     }
 
-    void parseReturn(){
+    void parseWhile(){
+        printNonTerminal("whileStatement");
+        expectPeek(TokenType.WHILE);
+        expectPeek(TokenType.LPAREN);
+        parseExpression();
+        expectPeek(TokenType.RPAREN);
+        expectPeek(TokenType.LBRACE);
+        parseStatements();
+        expectPeek(TokenType.RBRACE);
+        printNonTerminal("/whileStatement");
+    }
 
+    void parseReturn(){
+        printNonTerminal("returnStatement");
+        expectPeek(TokenType.RETURN);
+        if (!peekTokenIs(TokenType.SEMICOLON)) {
+            parseExpression();
+        }
+        expectPeek(TokenType.SEMICOLON);
+        printNonTerminal("/returnStatement");
     }
 
 }
