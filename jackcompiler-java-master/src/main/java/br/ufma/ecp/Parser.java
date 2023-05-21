@@ -109,6 +109,29 @@ public class Parser {
         printNonTerminal("/class");
     }
 
+    void parseClassVarDec() {
+        printNonTerminal("classVarDec");
+        expectPeek(TokenType.FIELD, TokenType.STATIC);
+
+        //if (currentTokenIs(TokenType.FIELD))
+
+        expectPeek(TokenType.INT, TokenType.CHAR, TokenType.BOOLEAN, TokenType.IDENT);
+        String type = currentToken.value();
+
+        expectPeek(TokenType.IDENT);
+        String name = currentToken.value();
+
+        while (peekTokenIs(TokenType.COMMA)) {
+            expectPeek(TokenType.COMMA);
+            expectPeek(TokenType.IDENT);
+
+            name = currentToken.value();
+        }
+
+        expectPeek(TokenType.SEMICOLON);
+        printNonTerminal("/classVarDec");
+    }
+
     void parseTerm() {
         printNonTerminal("term");
         switch (peekToken.type) {
