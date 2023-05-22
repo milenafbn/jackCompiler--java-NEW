@@ -1,5 +1,7 @@
 package br.ufma.ecp;
 
+import java.beans.Expression;
+
 import br.ufma.ecp.token.Token;
 import br.ufma.ecp.token.TokenType;
 
@@ -232,6 +234,13 @@ public class Parser {
             break;
           case IDENT:
             expectPeek(TokenType.IDENT);
+            if (peekTokenIs(TokenType.LPAREN) || peekTokenIs(TokenType.DOT)){
+                parseSubroutineCall();
+            }else if (peekTokenIs(TokenType.LBRACKET)){
+                expectPeek(TokenType.LBRACKET);
+                parseExpression();
+                expectPeek(TokenType.RBRACKET);
+            }
             break;
           default:
             throw error(peekToken, "term expected");
@@ -260,7 +269,6 @@ public class Parser {
                 parseExpression();
                 nArgs++;
             }
-    
             printNonTerminal("/expressionList");
             return nArgs;
         }
@@ -350,13 +358,12 @@ public class Parser {
             parseStatements();
             expectPeek(TokenType.RBRACE);
         }
-        expectPeek(TokenType.SEMICOLON);
         printNonTerminal("/ifStatement");
     }
 
     void parseSubroutineCall() {
-        int nArgs = 0;
-        String functionName = (TokenType.IDENT + ",");
+        /*int nArgs = 0;
+        String functionName = (TokenType.IDENT + ",");*/
 
         /*if (TokenType.isKeyword(null)){
             functionName = TokenType.isSymbol(null) + "." + currentToken.value();
@@ -365,14 +372,14 @@ public class Parser {
 
         if (peekTokenIs(TokenType.LPAREN)) {
             expectPeek(TokenType.LPAREN);
-            nArgs = parseExpressionList() + 1;
+            parseExpressionList();
             expectPeek(TokenType.RPAREN);
-            functionName = className + "." + TokenType.IDENT;
+            /*functionName = className + "." + TokenType.IDENT;*/
 
         } else if(peekTokenIs(TokenType.DOT)){
             expectPeek(TokenType.DOT);
             expectPeek(TokenType.IDENT); 
-            functionName += currentToken.value();
+            /*functionName += currentToken.value();*/
 
             expectPeek(TokenType.LPAREN);
             parseExpressionList();
