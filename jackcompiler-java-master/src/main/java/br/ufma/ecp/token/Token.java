@@ -26,7 +26,7 @@ public String toString() {
                 valor = "&quot;" ;
             } else if (valor == "&") {
                 valor = "&amp;" ;
-            }
+            } 
 
         } else if (categoria.equals("number")) {
             categoria = "integerConstant";

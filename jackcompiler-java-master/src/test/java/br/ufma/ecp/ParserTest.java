@@ -10,8 +10,16 @@ import org.junit.Test;
 
 public class ParserTest extends TestSupport {
 
+  @Test
+  public void testParseLetSimple() {
+      var input = "let string = 20;";
+      var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
+      parser.parseLet();
+      System.out.println(parser.XMLOutput());
+  }
+
     @Test
-    public void testParseLetSimple() {
+    public void testParseLetSimple1() {
       var input = "let var1 = 10+20;";
         var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
         parser.parseLet();
@@ -273,7 +281,7 @@ public class ParserTest extends TestSupport {
 
         var result = parser.XMLOutput();
         expectedResult = expectedResult.replaceAll("  ", "");
-        result = result.replaceAll("\r", ""); // no codigo em linux não tem o retorno de carro
+        result = result.replaceAll("\r", ""); 
         assertEquals(expectedResult, result);
     }
 
