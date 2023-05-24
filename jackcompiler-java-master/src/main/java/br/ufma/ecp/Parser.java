@@ -22,6 +22,7 @@ public class Parser {
     }
 
     public void parse () {
+        parseClass();
     }
 
 
@@ -80,7 +81,6 @@ public class Parser {
             System.err.println(
             "[line " + line + "] Error" + where + ": " + message);
     }
-
 
     private ParseError error(Token token, String message) {
         if (token.type == TokenType.EOF) {
@@ -239,7 +239,7 @@ public class Parser {
                 expectPeek(TokenType.IDENT);
                 if (peekTokenIs(TokenType.LPAREN) || peekTokenIs(TokenType.DOT)){
                     parseSubroutineCall();
-                }else{
+                }else if(peekTokenIs(TokenType.LBRACKET)){
                     expectPeek(TokenType.LBRACKET);
                     parseExpression();
                     expectPeek(TokenType.RBRACKET);
@@ -254,9 +254,9 @@ public class Parser {
             case NOT:
                 expectPeek(TokenType.MINUS, TokenType.NOT);
                 parseTerm();
-                break;
-          default:
-            throw error(peekToken, "term expected");
+                    break;
+                default:
+                    throw error(peekToken, "term expected");
         }
     
         printNonTerminal("/term");
@@ -335,15 +335,15 @@ public class Parser {
         printNonTerminal("letStatement");
         expectPeek(TokenType.LET);
         expectPeek(TokenType.IDENT);
-        if (!peekTokenIs(TokenType.LBRACKET)) {
+        if (peekTokenIs(TokenType.LBRACKET)) {
             expectPeek(TokenType.LBRACKET);
             parseExpression();
             expectPeek(TokenType.RBRACKET);
             /*isArray = true;*/
-        }else{
-            peekTokenIs(TokenType.IDENT);
+        }/*else if(peekTokenIs(TokenType.IDENT)){
+            expectPeek(TokenType.IDENT);
             parseExpression();
-        }
+        }*/
         expectPeek(TokenType.EQ);
         parseExpression();
         expectPeek(TokenType.SEMICOLON);

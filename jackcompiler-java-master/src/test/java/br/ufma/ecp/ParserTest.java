@@ -10,16 +10,8 @@ import org.junit.Test;
 
 public class ParserTest extends TestSupport {
 
-  @Test
-  public void testParseLetSimple() {
-      var input = "let string = 20;";
-      var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
-      parser.parseLet();
-      System.out.println(parser.XMLOutput());
-  }
-
     @Test
-    public void testParseLetSimple1() {
+    public void testParseLetSimple() {
       var input = "let var1 = 10+20;";
         var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
         parser.parseLet();
