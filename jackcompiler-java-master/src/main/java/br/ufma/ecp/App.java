@@ -1,10 +1,16 @@
 package br.ufma.ecp;
+package com.java.nio;
 
 import static br.ufma.ecp.token.TokenType.*;
 
-
-
 import br.ufma.ecp.token.Token; 
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 public class App 
 {

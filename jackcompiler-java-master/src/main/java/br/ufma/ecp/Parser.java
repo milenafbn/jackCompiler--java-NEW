@@ -1,9 +1,15 @@
 package br.ufma.ecp;
+import static br.ufma.ecp.token.TokenType.*;
+
 
 import java.beans.Expression;
 
 import br.ufma.ecp.token.Token;
 import br.ufma.ecp.token.TokenType;
+import br.ufma.ecp.SymbolTable.Kind;
+import br.ufma.ecp.SymbolTable.Symbol;
+import br.ufma.ecp.VMWriter.Command;
+import br.ufma.ecp.VMWriter.Segment;
 
 public class Parser {
 
@@ -12,13 +18,22 @@ public class Parser {
     private Token currentToken;
     private Token peekToken;
     private StringBuilder xmlOutput = new StringBuilder();
+    private SymbolTable symbolTable;
+    private VMWriter vmWriter;
 
     private String className;
-
+    private int ifLabelNum;
+    private int whileLabelNum;
     
     public Parser (byte[] input) {
         scan = new Scanner(input);
+        symbolTable = new SymbolTable();
+        vmWriter = new VMWriter();
+
         nextToken();
+
+        ifLabelNum = 0;
+        whileLabelNum = 0;
     }
 
     public void parse () {
@@ -33,7 +48,8 @@ public class Parser {
 
 
     public String VMOutput() {
-        return "";
+        return vmWriter.vmOutput();
+        /* return ""; */
     }
 
      // funções auxiliares
