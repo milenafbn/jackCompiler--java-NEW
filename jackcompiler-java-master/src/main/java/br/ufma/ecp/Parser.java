@@ -49,7 +49,6 @@ public class Parser {
 
     public String VMOutput() {
         return vmWriter.vmOutput();
-        /* return ""; */
     }
 
      // funções auxiliares
@@ -71,25 +70,6 @@ public class Parser {
             return Segment.ARG;
         return null;
     }
-
-    private Command typeOperator(TokenType type) {
-        if (type == PLUS)
-            return Command.ADD;
-        if (type == MINUS)
-            return Command.SUB;
-        if (type == LT)
-            return Command.LT;
-        if (type == GT)
-            return Command.GT;
-        if (type == EQ)
-            return Command.EQ;
-        if (type == AND)
-            return Command.AND;
-        if (type == OR)
-            return Command.OR;
-        return null;
-    }
-
 
     boolean peekTokenIs(TokenType type) {
         return peekToken.type == type;
@@ -265,33 +245,49 @@ public class Parser {
         switch (peekToken.type) {
             case INT:
                 expectPeek(TokenType.INT);
-                var strValue = currentToken.lexeme;
-                vmWriter.writePush(Segment.const, integer.parseINT);
+                vmWriter.writePush(Segment.CONST, Integer.parseInt(currentToken.value()));
                 break;
             case NUMBER:
                 expectPeek(TokenType.NUMBER);
-                var strValue = currentToken.lexeme;
-                vmWriter.writePush(Segment.CONST, integer.parseINT());
+                vmWriter.writePush(Segment.CONST, Integer.parseInt(currentToken.lexeme));
                 break;
             case STRING:
                 expectPeek(TokenType.STRING);
+                var strValue = currentToken.value();
+                vmWriter.writePush(Segment.CONST, strValue.length());
+                vmWriter.writeCall("String.new", 1);
+                for (int i = 0; i < strValue.length(); i++) {
+                    vmWriter.writePush(Segment.CONST, strValue.charAt(i));
+                    vmWriter.writeCall("String.appendChar", 2);
+                }
                 break;
             case FALSE:
             case NULL:
             case TRUE:
                 expectPeek(TokenType.FALSE, TokenType.NULL, TokenType.TRUE);
+                vmWriter.writePush(Segment.CONST, 0);
+                if (currentToken.type == TRUE)
+                    vmWriter.writeArithmetic(Command.NOT);
                 break;
             case THIS:
                 expectPeek(TokenType.THIS);
+                vmWriter.writePush(Segment.POINTER, 0);
                 break;
             case IDENT:
                 expectPeek(TokenType.IDENT);
+                /* Symbol sym = SymbolTable.resolve(currentToken.value()); */
                 if (peekTokenIs(TokenType.LPAREN) || peekTokenIs(TokenType.DOT)){
                     parseSubroutineCall();
                 }else if(peekTokenIs(TokenType.LBRACKET)){
                     expectPeek(TokenType.LBRACKET);
                     parseExpression();
+                    vmWriter.writePush(kind2Segment(sym.kind()), sym.index());
+                    vmWriter.writeArithmetic(Command.ADD);
                     expectPeek(TokenType.RBRACKET);
+                    vmWriter.writePop(Segment.POINTER, 1); 
+                    vmWriter.writePush(Segment.THAT, 0);   
+                }else{
+                    vmWriter.writePush(kind2Segment(sym.kind()), sym.index());
                 }
                 break;
             case LPAREN:
@@ -302,12 +298,16 @@ public class Parser {
             case MINUS:
             case NOT:
                 expectPeek(TokenType.MINUS, TokenType.NOT);
+                var op = currentToken.type;
                 parseTerm();
+                if (op == MINUS)
+                    vmWriter.writeArithmetic(Command.NEG);
+                else
+                    vmWriter.writeArithmetic(Command.NOT);
                     break;
                 default:
                     throw error(peekToken, "term expected");
         }
-    
         printNonTerminal("/term");
       }
 
@@ -347,7 +347,7 @@ public class Parser {
             printNonTerminal("/expression");
       }
 
-       void compileOperators(TokenType type) {
+       public void compileOperators(TokenType type) {
 
         if (type == ASTERISK) {
             vmWriter.writeCall("Math.multiply", 2);
@@ -356,6 +356,24 @@ public class Parser {
         } else {
             vmWriter.writeArithmetic(typeOperator(type));
         }
+    }
+
+    private Command typeOperator(TokenType type) {
+        if (type == PLUS)
+            return Command.ADD;
+        if (type == MINUS)
+            return Command.SUB;
+        if (type == LT)
+            return Command.LT;
+        if (type == GT)
+            return Command.GT;
+        if (type == EQ)
+            return Command.EQ;
+        if (type == AND)
+            return Command.AND;
+        if (type == OR)
+            return Command.OR;
+        return null;
     }
 
       void parseStatements() {
