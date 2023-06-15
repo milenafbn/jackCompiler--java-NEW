@@ -3,6 +3,12 @@ package br.ufma.ecp;
 import static br.ufma.ecp.token.TokenType.*;
 
 import java.nio.charset.StandardCharsets;
+/* import br.ufma.ecp.token.Token;
+import br.ufma.ecp.token.IdentifierToken;
+import br.ufma.ecp.token.IntegerToken;
+import br.ufma.ecp.token.KeywordToken;
+import br.ufma.ecp.token.StringToken;
+import br.ufma.ecp.token.SymbolToken; */
 import java.util.HashMap;
 import java.util.Map;
 

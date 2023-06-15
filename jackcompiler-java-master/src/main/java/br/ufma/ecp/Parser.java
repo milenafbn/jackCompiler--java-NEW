@@ -19,7 +19,7 @@ public class Parser {
     private Token peekToken;
     private StringBuilder xmlOutput = new StringBuilder();
     private SymbolTable symbolTable;
-    private VMWriter vmWriter;
+    private VMWriter vmWriter = new VMWriter();
 
     private String className;
     private int ifLabelNum;
@@ -89,9 +89,6 @@ public class Parser {
             return Command.OR;
         return null;
     }
-
-}
-
 
 
     boolean peekTokenIs(TokenType type) {
@@ -268,9 +265,13 @@ public class Parser {
         switch (peekToken.type) {
             case INT:
                 expectPeek(TokenType.INT);
+                var strValue = currentToken.lexeme;
+                vmWriter.writePush(Segment.const, integer.parseINT);
                 break;
             case NUMBER:
                 expectPeek(TokenType.NUMBER);
+                var strValue = currentToken.lexeme;
+                vmWriter.writePush(Segment.CONST, integer.parseINT());
                 break;
             case STRING:
                 expectPeek(TokenType.STRING);
@@ -338,11 +339,24 @@ public class Parser {
             printNonTerminal("expression");
             parseTerm ();
             while (isOperator(peekToken.lexeme)) {
+                var ope = peekToken.type;
                 expectPeek(peekToken.type);
                 parseTerm();
+                compileOperators(ope);
             }
             printNonTerminal("/expression");
       }
+
+       void compileOperators(TokenType type) {
+
+        if (type == ASTERISK) {
+            vmWriter.writeCall("Math.multiply", 2);
+        } else if (type == SLASH) {
+            vmWriter.writeCall("Math.divide", 2);
+        } else {
+            vmWriter.writeArithmetic(typeOperator(type));
+        }
+    }
 
       void parseStatements() {
         printNonTerminal("statements");
