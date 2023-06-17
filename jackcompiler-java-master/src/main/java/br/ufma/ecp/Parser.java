@@ -277,7 +277,8 @@ public class Parser {
                 break;
             case IDENT:
                 expectPeek(TokenType.IDENT);
-                /* Symbol sym = SymbolTable.resolve(currentToken.value()); */
+                SymbolTable symbolTable = new SymbolTable();
+                Symbol sym = symbolTable.resolve(currentToken.value());
                 if (peekTokenIs(TokenType.LPAREN) || peekTokenIs(TokenType.DOT)){
                     parseSubroutineCall();
                 }else if(peekTokenIs(TokenType.LBRACKET)){
