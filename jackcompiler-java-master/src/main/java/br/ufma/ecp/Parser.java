@@ -138,45 +138,56 @@ public class Parser {
     
     void parseVarDec() {
         printNonTerminal("varDec");
-        expectPeek(TokenType.VAR);
+        expectPeek(VAR);
 
-        expectPeek(TokenType.INT, TokenType.CHAR, TokenType.BOOLEAN, TokenType.IDENT);
-        String type = currentToken.value();
+        SymbolTable.Kind kind = Kind.VAR;
 
-        expectPeek(TokenType.IDENT);
-        String name = currentToken.value();
+        // 'int' | 'char' | 'boolean' | className
+        expectPeek(INT, CHAR, BOOLEAN, IDENT);
+        String type = currentToken.lexeme;
 
-        while (peekTokenIs(TokenType.COMMA)) {
-            expectPeek(TokenType.COMMA);
-            expectPeek(TokenType.IDENT);
+        expectPeek(IDENT);
+        String name = currentToken.lexeme;
+        symTable.define(name, type, kind);
 
-            name = currentToken.value();
+        while (peekTokenIs(COMMA)) {
+            expectPeek(COMMA);
+            expectPeek(IDENT);
+
+            name = currentToken.lexeme;
+            symTable.define(name, type, kind);
+
         }
 
-        expectPeek(TokenType.SEMICOLON);
+        expectPeek(SEMICOLON);
         printNonTerminal("/varDec");
     }
 
     void parseClassVarDec() {
         printNonTerminal("classVarDec");
-        expectPeek(TokenType.FIELD, TokenType.STATIC);
+        expectPeek(FIELD, STATIC);
 
-        //if (currentTokenIs(TokenType.FIELD))
+        SymbolTable.Kind kind = Kind.STATIC;
+        if (currentTokenIs(FIELD))
+            kind = Kind.FIELD;
 
-        expectPeek(TokenType.INT, TokenType.CHAR, TokenType.BOOLEAN, TokenType.IDENT);
-        String type = currentToken.value();
+        // 'int' | 'char' | 'boolean' | className
+        expectPeek(INT, CHAR, BOOLEAN, IDENT);
+        String type = currentToken.lexeme;
 
-        expectPeek(TokenType.IDENT);
-        String name = currentToken.value();
+        expectPeek(IDENT);
+        String name = currentToken.lexeme;
 
-        while (peekTokenIs(TokenType.COMMA)) {
-            expectPeek(TokenType.COMMA);
-            expectPeek(TokenType.IDENT);
+        symTable.define(name, type, kind);
+        while (peekTokenIs(COMMA)) {
+            expectPeek(COMMA);
+            expectPeek(IDENT);
 
-            name = currentToken.value();
+            name = currentToken.lexeme;
+            symTable.define(name, type, kind);
         }
 
-        expectPeek(TokenType.SEMICOLON);
+        expectPeek(SEMICOLON);
         printNonTerminal("/classVarDec");
     }
 
@@ -208,24 +219,30 @@ public class Parser {
     void parseParameterList() {
         printNonTerminal("parameterList");
 
-        if (!peekTokenIs(TokenType.RPAREN)) // verifica se tem pelo menos uma expressao
+        SymbolTable.Kind kind = Kind.ARG;
+
+        if (!peekTokenIs(RPAREN)) // verifica se tem pelo menos uma expressao
         {
-            expectPeek(TokenType.INT, TokenType.CHAR, TokenType.BOOLEAN, TokenType.IDENT);
-            String type = currentToken.value();
+            expectPeek(INT, CHAR, BOOLEAN, IDENT);
+            String type = currentToken.lexeme;
 
-            expectPeek(TokenType.IDENT);
-            String name = currentToken.value();
+            expectPeek(IDENT);
+            String name = currentToken.lexeme;
+            symTable.define(name, type, kind);
 
-            while (peekTokenIs(TokenType.COMMA)) {
-                expectPeek(TokenType.COMMA);
-                expectPeek(TokenType.INT, TokenType.CHAR, TokenType.BOOLEAN, TokenType.IDENT);
-                type = currentToken.value();
+            while (peekTokenIs(COMMA)) {
+                expectPeek(COMMA);
+                expectPeek(INT, CHAR, BOOLEAN, IDENT);
+                type = currentToken.lexeme;
 
-                expectPeek(TokenType.IDENT);
-                name = currentToken.value();
+                expectPeek(IDENT);
+                name = currentToken.lexeme;
+
+                symTable.define(name, type, kind);
             }
 
         }
+
         printNonTerminal("/parameterList");
     }
 
@@ -465,7 +482,7 @@ public class Parser {
         if (peekTokenIs(ELSE))
         {
             expectPeek(ELSE);
-            expectPeek(LBRACE)
+            expectPeek(LBRACE);
             parseStatements();
             expectPeek(RBRACE);
             vmWriter.writeLabel(labelEnd);
