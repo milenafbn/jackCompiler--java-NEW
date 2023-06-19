@@ -233,14 +233,14 @@ public class GeneratorCodeTest {
         parser.parseStatement();
         String actual = parser.VMOutput();
         String expected = """
-            label WHILE_EXP0
-            push constant 0
-						not
-            if-goto WHILE_END0
-            push constant 10
-            return
-            goto WHILE_EXP0
-            label WHILE_END0
+label WHILE_EXP0
+push constant 0
+not
+if-goto WHILE_END0
+push constant 10
+return
+goto WHILE_EXP0
+label WHILE_END0
                     """;
             assertEquals(expected, actual);
     }

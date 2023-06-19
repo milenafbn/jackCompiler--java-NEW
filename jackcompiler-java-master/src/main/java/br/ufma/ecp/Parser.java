@@ -1,9 +1,6 @@
 package br.ufma.ecp;
 import static br.ufma.ecp.token.TokenType.*;
 
-
-import java.beans.Expression;
-
 import br.ufma.ecp.token.Token;
 import br.ufma.ecp.token.TokenType;
 import br.ufma.ecp.SymbolTable.Kind;
@@ -51,7 +48,6 @@ public class Parser {
         return vmWriter.vmOutput();
     }
 
-     // funções auxiliares
      public String XMLOutput() {
         return xmlOutput.toString();
     }
@@ -283,7 +279,7 @@ public class Parser {
         switch (peekToken.type) {
             case INT:
                 expectPeek(TokenType.INT);
-                vmWriter.writePush(Segment.CONST, Integer.parseInt(currentToken.value()));
+                vmWriter.writePush(Segment.CONST, Integer.parseInt(currentToken.lexeme)); /*ou value ?? */
                 break;
             case NUMBER:
                 expectPeek(TokenType.NUMBER);
@@ -383,6 +379,7 @@ public class Parser {
         void parseExpression() {
             printNonTerminal("expression");
             parseTerm ();
+            
             while (isOperator(peekToken.lexeme)) {
                 var ope = peekToken.type;
                 expectPeek(peekToken.type);
@@ -458,36 +455,37 @@ public class Parser {
     }
 
     void parseLet() {
+
         var isArray = false;
+
         printNonTerminal("letStatement");
-        Symbol sym = symTable.resolve(currentToken.lexeme);
         expectPeek(TokenType.LET);
         expectPeek(TokenType.IDENT);
-        if (peekTokenIs(LBRACKET)) { 
-            expectPeek(LBRACKET);
-            parseExpression();
-            
-            vmWriter.writePush(kind2Segment(sym.kind()), sym.index());
-            vmWriter.writeArithmetic(Command.ADD);
-    
-            expectPeek(RBRACKET);
+
+        var symbol = symTable.resolve(currentToken.lexeme);
+
+        if (peekTokenIs(TokenType.LBRACKET)) {
+            expectPeek(TokenType.LBRACKET);
+            parseExpression();         
+            expectPeek(TokenType.RBRACKET);
+
             isArray = true;
         }
 
-        expectPeek(EQ);
+        expectPeek(TokenType.EQ);
         parseExpression();
 
         if (isArray) {
-            vmWriter.writePop(Segment.TEMP, 0);    // push result back onto stack
-            vmWriter.writePop(Segment.POINTER, 1); // pop address pointer into pointer 1
-            vmWriter.writePush(Segment.TEMP, 0);   // push result back onto stack
-            vmWriter.writePop(Segment.THAT, 0);    // Store right hand side evaluation in THAT 0.
+    
+
         } else {
-            vmWriter.writePush(kind2Segment(sym.kind()), sym.index());
+            vmWriter.writePop(kind2Segment(symbol.kind()), symbol.index());
         }
+
+
         expectPeek(TokenType.SEMICOLON);
         printNonTerminal("/letStatement");
-    } 
+    }
 
     void parseIf() {
         printNonTerminal("ifStatement");
@@ -510,6 +508,7 @@ public class Parser {
         expectPeek(LBRACE);
         parseStatements();
         expectPeek(RBRACE);
+
         if (peekTokenIs(ELSE)){
             vmWriter.writeGoto(labelEnd);
         }
@@ -531,7 +530,7 @@ public class Parser {
     void parseSubroutineCall() {
         var nArgs = 0;
     
-        var ident = currentToken.lexeme;
+        var ident = currentToken.lexeme; //??value
         var symbol = symTable.resolve(ident); // classe ou objeto
         var functionName = ident + ".";
 
